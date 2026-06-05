@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – Register</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        body {
+            background-color: #f0fdf4;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(22,163,74,0.12);
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem 2rem;
+        }
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            font-size: 2rem;
+            color: #fff;
+        }
+        .nav-tabs .nav-link.active {
+            color: #16a34a;
+            border-bottom: 2px solid #16a34a;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link { color: #6b7280; border: none; }
+        .btn-green { background-color: #16a34a; color: #fff; border: none; }
+        .btn-green:hover { background-color: #15803d; color: #fff; }
+        .form-control:focus { border-color: #16a34a; box-shadow: 0 0 0 0.2rem rgba(22,163,74,0.2); }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <!-- Icon -->
+    <div class="icon-box">&#9917;</div>
+
+    <!-- Title -->
+    <h3 class="text-center fw-bold mb-0" style="color:#15803d;">J Arena</h3>
+    <p class="text-center text-muted small mb-3">Football Field Booking System</p>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4 justify-content-center border-0">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/login}">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" th:href="@{/register}">Register</a>
+        </li>
+    </ul>
+
+    <!-- Error alert -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible py-2 small" role="alert">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Form -->
+    <form th:action="@{/register}" th:object="${user}" method="post">
+        <div class="mb-3">
+            <label for="fullName" class="form-label fw-semibold small">Full Name</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" id="fullName" th:field="*{fullName}" class="form-control"
+                       placeholder="Ahmad bin Ali" required/>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label fw-semibold small">Email Address</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" id="email" th:field="*{email}" class="form-control"
+                       placeholder="you@example.com" required/>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold small">Phone Number</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="tel" id="phone" th:field="*{phone}" class="form-control"
+                       placeholder="+60 12-345 6789"/>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="password" class="form-label fw-semibold small">Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" id="password" th:field="*{password}" class="form-control"
+                       placeholder="••••••••" required/>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-green w-100 fw-semibold py-2">
+            <i class="bi bi-person-plus me-2"></i>Create Account
+        </button>
+    </form>
+
+    <p class="text-center text-muted small mt-3 mb-0">
+        Already have an account? <a th:href="@{/login}" class="text-success fw-semibold">Sign in</a>
+    </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

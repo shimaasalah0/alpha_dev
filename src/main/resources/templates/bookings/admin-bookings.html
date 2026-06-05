@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – Admin Bookings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        /* ── Sidebar ────────────────────────────────── */
+        .sidebar {
+            width: 240px; min-height: 100vh;
+            background: #fff; border-right: 1px solid #e5e7eb;
+            position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active {
+            background: #dcfce7; color: #16a34a;
+            font-weight: 600; border-left: 3px solid #16a34a;
+        }
+
+        /* ── Sidebar user ───────────────────────────── */
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #dc2626; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name  { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role  { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+
+        /* ── Main ───────────────────────────────────── */
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+
+        /* ── Filter tabs ────────────────────────────── */
+        .filter-bar {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: 0 1.75rem; display: flex; gap: .25rem;
+        }
+        .filter-bar a {
+            padding: .65rem 1rem; font-size: .85rem; font-weight: 500;
+            color: #6b7280; text-decoration: none; border-bottom: 2px solid transparent;
+            transition: color .15s, border-color .15s;
+        }
+        .filter-bar a:hover { color: #16a34a; }
+        .filter-bar a.tab-active { color: #16a34a; border-bottom-color: #16a34a; font-weight: 600; }
+
+        /* ── Schedule table ─────────────────────────── */
+        .schedule-wrap { overflow-x: auto; }
+        .schedule-table { width: 100%; min-width: 620px; border-collapse: collapse; }
+        .schedule-table th {
+            background: #f9fafb; font-size: .75rem; font-weight: 600;
+            text-align: center; padding: .5rem .4rem;
+            border: 1px solid #e5e7eb; white-space: nowrap;
+        }
+        .schedule-table th.today-col { background: #dcfce7; }
+        .schedule-table td.today-slot { background: #f0fdf4; }
+        .schedule-table td {
+            border: 1px solid #f0f0f0; padding: 2px 3px;
+            min-width: 72px; height: 32px; vertical-align: middle;
+        }
+        .slot-time {
+            font-size: .72rem; font-weight: 600; color: #6b7280;
+            text-align: right; padding-right: 8px !important;
+            min-width: 52px; background: #f9fafb;
+        }
+        .booking-cell {
+            border-radius: 4px; padding: 2px 5px; font-size: .7rem; font-weight: 600;
+            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+            max-width: 90px; cursor: default;
+        }
+        .booking-confirmed { background: #dcfce7; color: #15803d; border-left: 3px solid #16a34a; }
+        .booking-pending   { background: #fef9c3; color: #854d0e; border-left: 3px solid #ca8a04; }
+        .booking-completed { background: #e5e7eb; color: #374151; border-left: 3px solid #6b7280; }
+        .booking-cancelled { background: #fee2e2; color: #991b1b; border-left: 3px solid #dc2626; }
+
+        /* ── Legend ─────────────────────────────────── */
+        .legend-dot {
+            display: inline-block; width: 10px; height: 10px;
+            border-radius: 2px; margin-right: 3px; vertical-align: middle;
+        }
+        .legend-dot.confirmed { background: #16a34a; }
+        .legend-dot.pending   { background: #ca8a04; }
+        .legend-dot.completed { background: #6b7280; }
+        .legend-dot.cancelled { background: #dc2626; }
+
+        /* ── Booking list items ─────────────────────── */
+        .booking-item { padding: .85rem .9rem; border-bottom: 1px solid #f3f4f6; }
+        .booking-item:last-child { border-bottom: none; }
+        .booking-item .field-name { font-weight: 600; font-size: .85rem; color: #111827; }
+        .booking-item .meta { font-size: .75rem; color: #6b7280; margin-top: .2rem; }
+        .booking-item .price { font-weight: 700; font-size: .85rem; color: #16a34a; }
+
+        .status-badge {
+            font-size: .65rem; font-weight: 700; padding: .15rem .5rem;
+            border-radius: 20px; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .badge-confirmed { background: #dcfce7; color: #15803d; }
+        .badge-pending   { background: #fef9c3; color: #92400e; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+        .badge-completed { background: #e5e7eb; color: #374151; }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Admin Panel</div>
+    </div>
+
+    <nav class="pt-1">
+        <div class="sidebar-section">Overview</div>
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a th:href="@{/admin/bookings}" class="active"><i class="bi bi-calendar-check"></i> All Bookings</a>
+        <div class="sidebar-section">Management</div>
+        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Manage Fields</a>
+        <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Manage Users</a>
+        <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">More</div>
+        <a th:href="@{/admin/events}"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/admin/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+    </nav>
+
+    <div class="sidebar-user">
+        <div class="avatar-circle"
+             th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Admin</div>
+            <div class="role">ADMINISTRATOR</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ══ MAIN CONTENT ═════════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <h4><i class="bi bi-calendar-week me-2 text-success"></i>Bookings Management</h4>
+            <p>View and manage all field reservations</p>
+        </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-bar">
+        <a th:href="@{/admin/bookings(weekStart=${weekStart},status='ALL')}"
+           th:class="${selectedStatus == 'ALL'} ? 'tab-active' : ''">All</a>
+        <a th:href="@{/admin/bookings(weekStart=${weekStart},status='PENDING')}"
+           th:class="${selectedStatus == 'PENDING'} ? 'tab-active' : ''">Pending</a>
+        <a th:href="@{/admin/bookings(weekStart=${weekStart},status='CONFIRMED')}"
+           th:class="${selectedStatus == 'CONFIRMED'} ? 'tab-active' : ''">Confirmed</a>
+        <a th:href="@{/admin/bookings(weekStart=${weekStart},status='CANCELLED')}"
+           th:class="${selectedStatus == 'CANCELLED'} ? 'tab-active' : ''">Cancelled</a>
+        <a th:href="@{/admin/bookings(weekStart=${weekStart},status='COMPLETED')}"
+           th:class="${selectedStatus == 'COMPLETED'} ? 'tab-active' : ''">Completed</a>
+    </div>
+
+    <!-- Body -->
+    <div class="p-3 flex-grow-1">
+        <div class="row g-3">
+
+            <!-- ── LEFT: Week Schedule (col-8) ──────────────────────────── -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-2 px-3">
+                        <span class="fw-semibold" style="font-size:.9rem;">
+                            <i class="bi bi-calendar3 text-success me-2"></i>Week Schedule
+                            <span class="badge bg-light text-secondary ms-1" style="font-size:.7rem;">All Users</span>
+                        </span>
+                        <div class="d-flex gap-1">
+                            <a th:href="@{/admin/bookings(weekStart=${prevWeek},status=${selectedStatus})}"
+                               class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size:.75rem;">
+                                <i class="bi bi-chevron-left"></i> Prev
+                            </a>
+                            <a th:href="@{/admin/bookings}"
+                               class="btn btn-outline-success btn-sm px-2 py-1" style="font-size:.75rem;">
+                                Today
+                            </a>
+                            <a th:href="@{/admin/bookings(weekStart=${nextWeek},status=${selectedStatus})}"
+                               class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size:.75rem;">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-2 schedule-wrap">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:52px;">Time</th>
+                                    <th th:each="date, i : ${weekDates}"
+                                        th:class="${date == today} ? 'today-col' : ''">
+                                        <div th:text="${weekDayNames[i.index]}">Sun</div>
+                                        <small class="fw-normal text-muted"
+                                               th:text="${weekDayNums[i.index]}">Jun 1</small>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="slot : ${timeSlots}">
+                                    <td class="slot-time" th:text="${slot}">08:00</td>
+                                    <td th:each="date : ${weekDates}"
+                                        th:class="${date == today} ? 'today-slot' : ''">
+                                        <div th:if="${bookingMap[date + '_' + slot] != null}"
+                                             th:class="${'booking-cell ' +
+                                                (bookingMap[date + '_' + slot].status == 'CONFIRMED' ? 'booking-confirmed' :
+                                                (bookingMap[date + '_' + slot].status == 'PENDING'   ? 'booking-pending'   :
+                                                (bookingMap[date + '_' + slot].status == 'CANCELLED' ? 'booking-cancelled' :
+                                                'booking-completed')))}"
+                                             th:title="${bookingMap[date + '_' + slot].user.fullName + ' · ' + bookingMap[date + '_' + slot].field.name + ' · ' + bookingMap[date + '_' + slot].status}"
+                                             th:text="${bookingMap[date + '_' + slot].user.fullName}">
+                                            Ali Ahmad
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- legend -->
+                    <div class="d-flex gap-3 px-3 py-2 border-top" style="font-size:.72rem; color:#6b7280;">
+                        <span><span class="legend-dot confirmed"></span>Confirmed</span>
+                        <span><span class="legend-dot pending"></span>Pending</span>
+                        <span><span class="legend-dot completed"></span>Completed</span>
+                        <span><span class="legend-dot cancelled"></span>Cancelled</span>
+                    </div>
+                </div>
+            </div><!-- col-8 -->
+
+            <!-- ── RIGHT: All Bookings (col-4) ──────────────────────────── -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom py-2 px-3">
+                        <span class="fw-semibold" style="font-size:.9rem;">
+                            <i class="bi bi-list-check text-success me-2"></i>Recent Bookings
+                        </span>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(bookings)}" class="card-body text-center py-5">
+                        <i class="bi bi-calendar-x" style="font-size:2.5rem;color:#d1d5db;"></i>
+                        <p class="text-muted small mt-2 mb-0">No bookings found.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(bookings)}" class="p-0">
+                        <div th:each="b, iterStat : ${bookings}"
+                             th:if="${iterStat.index < 8}"
+                             class="booking-item">
+
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="field-name" th:text="${b.field.name}">Arena A</span>
+                                <span class="status-badge ms-1"
+                                      th:class="'status-badge ' +
+                                          (${b.status == 'CONFIRMED'} ? 'badge-confirmed' :
+                                          (${b.status == 'PENDING'}   ? 'badge-pending'   :
+                                          (${b.status == 'CANCELLED'} ? 'badge-cancelled' :
+                                          'badge-completed')))"
+                                      th:text="${b.status}">CONFIRMED</span>
+                            </div>
+
+                            <div class="meta">
+                                <i class="bi bi-person me-1"></i>
+                                <span th:text="${b.user.fullName}">Ahmad Ali</span>
+                            </div>
+                            <div class="meta">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span th:text="${b.bookingDate}">2026-06-01</span>
+                                &nbsp;
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${b.startTime + ' – ' + b.endTime}">08:00 – 10:00</span>
+                            </div>
+
+                            <!-- price + action buttons -->
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="price">RM <span th:text="${b.totalPrice}">160.00</span></span>
+                                <div class="d-flex gap-1">
+                                    <!-- Confirm -->
+                                    <form th:if="${b.status == 'PENDING'}"
+                                          th:action="@{/admin/bookings/status/{id}(id=${b.id})}"
+                                          method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CONFIRMED"/>
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm py-0 px-2"
+                                                style="font-size:.7rem;" title="Confirm">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    <!-- Cancel -->
+                                    <form th:if="${b.status == 'PENDING' || b.status == 'CONFIRMED'}"
+                                          th:action="@{/admin/bookings/status/{id}(id=${b.id})}"
+                                          method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CANCELLED"/>
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm py-0 px-2"
+                                                style="font-size:.7rem;" title="Cancel"
+                                                onclick="return confirm('Cancel this booking?')">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                    <!-- Complete -->
+                                    <form th:if="${b.status == 'CONFIRMED'}"
+                                          th:action="@{/admin/bookings/status/{id}(id=${b.id})}"
+                                          method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="COMPLETED"/>
+                                        <button type="submit"
+                                                class="btn btn-secondary btn-sm py-0 px-2"
+                                                style="font-size:.7rem;" title="Mark Completed">
+                                            <i class="bi bi-check-all"></i>
+                                        </button>
+                                    </form>
+                                    <!-- Delete -->
+                                    <a th:href="@{/admin/bookings/delete/{id}(id=${b.id})}"
+                                       class="btn btn-outline-danger btn-sm py-0 px-2"
+                                       style="font-size:.7rem;" title="Delete"
+                                       onclick="return confirm('Delete this booking permanently?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div><!-- booking-item -->
+
+                        <div th:if="${#lists.size(bookings) > 8}"
+                             class="text-center py-2 border-top">
+                            <a th:href="@{/admin/bookings(status='ALL')}" class="text-success small fw-semibold">
+                                View all <span th:text="${#lists.size(bookings)}">9</span> bookings
+                            </a>
+                        </div>
+                    </div>
+
+                </div><!-- card -->
+            </div><!-- col-4 -->
+
+        </div><!-- row -->
+    </div><!-- body padding -->
+
+    <!-- Footer -->
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+
+</div><!-- main-wrap -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

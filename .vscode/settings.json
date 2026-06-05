@@ -1,0 +1,7 @@
+{
+  "sql.dialect": "mysql",
+  "sqltools.connections": [],
+  "[sql]": {
+    "editor.defaultFormatter": "mtxr.sqltools"
+  }
+}

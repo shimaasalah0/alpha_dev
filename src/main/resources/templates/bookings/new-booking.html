@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – New Booking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        body {
+            background: rgba(0, 0, 0, 0.72);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .booking-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 2.25rem 2rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+        }
+        .icon-box {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; color: #fff;
+            margin-bottom: 1rem;
+        }
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #374151; }
+        .form-control:focus, .form-select:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 0.2rem rgba(22,163,74,0.18);
+        }
+        .btn-green { background: #16a34a; color: #fff; border: none; }
+        .btn-green:hover { background: #15803d; color: #fff; }
+        .field-price { font-size: 0.78rem; color: #6b7280; margin-top: 0.25rem; }
+    </style>
+</head>
+<body>
+<div class="booking-card">
+
+    <div class="icon-box">&#9917;</div>
+    <h4 class="fw-bold mb-0">New Booking</h4>
+    <p class="text-muted small mb-4">Reserve a football field below.</p>
+
+    <!-- Error alert -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible py-2 small" role="alert">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form th:action="@{/bookings/create}" method="post">
+
+        <!-- Field -->
+        <div class="mb-3">
+            <label for="fieldId" class="form-label">Field</label>
+            <select id="fieldId" name="fieldId" class="form-select" required>
+                <option value="" disabled selected>— Select a field —</option>
+                <option th:each="f : ${fields}"
+                        th:value="${f.id}"
+                        th:text="${f.name + ' — RM ' + f.pricePerHour + '/hr (' + f.location + ')'}">
+                    Field A
+                </option>
+            </select>
+        </div>
+
+        <!-- Date -->
+        <div class="mb-3">
+            <label for="bookingDate" class="form-label">Date</label>
+            <input type="date" id="bookingDate" name="bookingDate" class="form-control"
+                   th:value="${preDate}"
+                   required/>
+        </div>
+
+        <!-- Time row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6">
+                <label for="startTime" class="form-label">Start Time</label>
+                <input type="time" id="startTime" name="startTime" class="form-control"
+                       th:value="${preStart}" required/>
+            </div>
+            <div class="col-6">
+                <label for="endTime" class="form-label">End Time</label>
+                <input type="time" id="endTime" name="endTime" class="form-control"
+                       th:value="${preEnd}" required/>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2">
+            <a th:href="@{/bookings}" class="btn btn-outline-secondary flex-fill">
+                <i class="bi bi-x-circle me-1"></i>Cancel
+            </a>
+            <button type="submit" class="btn btn-green flex-fill fw-semibold">
+                <i class="bi bi-calendar-plus me-1"></i>Create Booking
+            </button>
+        </div>
+
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
