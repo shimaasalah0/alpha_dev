@@ -16,6 +16,12 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     @Transactional
+    public User findById(long id) {
+        return sessionFactory.getCurrentSession().get(User.class, id);
+    }
+
+    @Override
+    @Transactional
     public User findByEmail(String email) {
         List<User> results = sessionFactory.getCurrentSession()
                 .createQuery("FROM User u WHERE u.email = :email", User.class)
@@ -38,5 +44,14 @@ public class UserDaoImpl implements UserDao {
                 .setParameter("email", email)
                 .uniqueResult();
         return count != null && count > 0;
+    }
+
+    @Override
+    @Transactional
+    public long countAll() {
+        Long count = sessionFactory.getCurrentSession()
+                .createQuery("SELECT COUNT(u) FROM User u", Long.class)
+                .uniqueResult();
+        return count != null ? count : 0L;
     }
 }

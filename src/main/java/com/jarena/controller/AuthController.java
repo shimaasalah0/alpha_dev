@@ -16,6 +16,13 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/")
+    public String root(HttpSession session) {
+        return AuthHelper.isLoggedIn(session)
+                ? (AuthHelper.isAdmin(session) ? "redirect:/admin/dashboard" : "redirect:/dashboard")
+                : "redirect:/login";
+    }
+
     @GetMapping("/login")
     public String showLogin(HttpSession session) {
         if (AuthHelper.isLoggedIn(session)) {

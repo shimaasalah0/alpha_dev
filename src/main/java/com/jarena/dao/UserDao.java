@@ -4,6 +4,8 @@ import com.jarena.model.User;
 
 public interface UserDao {
     User findByEmail(String email);
+    User findById(long id);
     void save(User user);
     boolean emailExists(String email);
+    long countAll();
 }

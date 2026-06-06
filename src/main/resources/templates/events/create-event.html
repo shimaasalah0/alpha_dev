@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena Admin – Create Event</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active {
+            background: #dcfce7; color: #16a34a;
+            font-weight: 600; border-left: 3px solid #16a34a;
+        }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #dc2626; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; gap: .75rem;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+
+        .form-label { font-size: .8rem; font-weight: 600; color: #374151; }
+        .form-control, .form-select {
+            font-size: .875rem; border-radius: 8px; border: 1px solid #d1d5db;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,.15);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Admin Panel</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Dashboard</div>
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <div class="sidebar-section">Management</div>
+        <a th:href="@{/admin/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
+        <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">Promotions</div>
+        <a th:href="@{/admin/events}" class="active"><i class="bi bi-trophy"></i> Events</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle">A</div>
+        <div>
+            <div class="name">Admin</div>
+            <div class="role">ADMIN</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+    <div class="page-header">
+        <a th:href="@{/admin/events}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Events
+        </a>
+        <h4><i class="bi bi-plus-circle text-success me-2"></i>Create New Event</h4>
+    </div>
+
+    <div class="p-3 flex-grow-1 d-flex justify-content-center">
+        <div style="width:100%;max-width:640px;">
+
+            <!-- Error alert -->
+            <div th:if="${error}" class="alert alert-danger py-2 small mb-3">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <span th:text="${error}">Error message</span>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-2 px-3">
+                    <span class="fw-semibold small">Event Details</span>
+                </div>
+                <div class="card-body p-3">
+                    <form th:action="@{/admin/events/create}" th:object="${event}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label">Event Title <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{title}"
+                                   class="form-control form-control-sm"
+                                   placeholder="e.g. J Arena Summer Cup 2026" required/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea th:field="*{description}"
+                                      class="form-control form-control-sm"
+                                      rows="4"
+                                      placeholder="Describe the event, rules, prizes, etc."></textarea>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">Event Date <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{eventDate}"
+                                       class="form-control form-control-sm" required/>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Location</label>
+                                <input type="text" th:field="*{location}"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Field A, J Arena"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Image URL <span class="text-muted small">(optional)</span></label>
+                            <input type="url" th:field="*{imageUrl}"
+                                   class="form-control form-control-sm"
+                                   placeholder="https://..."/>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/admin/events}"
+                               class="btn btn-sm btn-outline-secondary">Cancel</a>
+                            <button type="submit"
+                                    class="btn btn-sm fw-semibold"
+                                    style="background:#16a34a;color:#fff;">
+                                <i class="bi bi-check-lg me-1"></i>Create Event
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

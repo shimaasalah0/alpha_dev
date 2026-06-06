@@ -148,7 +148,7 @@
             <div class="col-sm-6 col-xl-3">
                 <div class="stat-card card-blue d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">84</div>
+                        <div class="stat-value" th:text="${totalBookings}">0</div>
                         <div class="stat-label">Total Bookings</div>
                     </div>
                     <i class="bi bi-calendar3 stat-icon"></i>
@@ -157,7 +157,7 @@
             <div class="col-sm-6 col-xl-3">
                 <div class="stat-card card-green d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">RM 6,240</div>
+                        <div class="stat-value" th:text="${monthlyRevenue}">RM 0</div>
                         <div class="stat-label">Monthly Revenue</div>
                     </div>
                     <i class="bi bi-cash-coin stat-icon"></i>
@@ -166,8 +166,8 @@
             <div class="col-sm-6 col-xl-3">
                 <div class="stat-card card-purple d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">47</div>
-                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value" th:text="${totalUsers}">0</div>
+                        <div class="stat-label">Total Users</div>
                     </div>
                     <i class="bi bi-people-fill stat-icon"></i>
                 </div>
@@ -175,7 +175,7 @@
             <div class="col-sm-6 col-xl-3">
                 <div class="stat-card card-orange d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">6</div>
+                        <div class="stat-value" th:text="${availableFields}">0</div>
                         <div class="stat-label">Available Fields</div>
                     </div>
                     <i class="bi bi-geo-alt-fill stat-icon"></i>
@@ -191,41 +191,36 @@
                         <i class="bi bi-activity text-success me-2"></i>Recent Activity
                     </div>
                     <div class="card-body">
-                        <div class="activity-item">
-                            <div class="activity-dot bg-success"></div>
+                        <div th:each="b : ${recentBookings}" class="activity-item">
+                            <div th:class="${'activity-dot ' +
+                                (b.status == 'CONFIRMED'  ? 'bg-success' :
+                                (b.status == 'PENDING'    ? 'bg-warning' :
+                                (b.status == 'CANCELLED'  ? 'bg-danger'  :
+                                'bg-secondary')))}"></div>
                             <div>
-                                <div class="small fw-semibold">New booking – Field A</div>
-                                <div class="text-muted" style="font-size:0.78rem;">Ahmad Ali &bull; 2 minutes ago</div>
+                                <div class="small fw-semibold">
+                                    <span th:text="${b.field.name}">Field</span>
+                                    &bull;
+                                    <span th:text="${b.bookingDate + ' ' + b.startTime + '–' + b.endTime}">date</span>
+                                </div>
+                                <div class="text-muted" style="font-size:0.78rem;">
+                                    <span th:text="${b.user.fullName}">User</span>
+                                    &bull;
+                                    <span class="ms-1"
+                                          th:class="${'badge ' +
+                                            (b.status == 'CONFIRMED'  ? 'bg-success' :
+                                            (b.status == 'PENDING'    ? 'bg-warning text-dark' :
+                                            (b.status == 'CANCELLED'  ? 'bg-danger' :
+                                            'bg-secondary')))}"
+                                          th:text="${b.status}">STATUS</span>
+                                </div>
+                            </div>
+                            <div class="ms-auto small fw-semibold text-success">
+                                RM <span th:text="${b.totalPrice}">0</span>
                             </div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-dot bg-primary"></div>
-                            <div>
-                                <div class="small fw-semibold">New user registered</div>
-                                <div class="text-muted" style="font-size:0.78rem;">sara@email.com &bull; 15 minutes ago</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-dot bg-warning"></div>
-                            <div>
-                                <div class="small fw-semibold">Payment received – RM 80</div>
-                                <div class="text-muted" style="font-size:0.78rem;">Booking #041 &bull; 1 hour ago</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-dot bg-danger"></div>
-                            <div>
-                                <div class="small fw-semibold">Booking cancelled – Field C</div>
-                                <div class="text-muted" style="font-size:0.78rem;">razif@email.com &bull; 3 hours ago</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-dot bg-info"></div>
-                            <div>
-                                <div class="small fw-semibold">Field B maintenance scheduled</div>
-                                <div class="text-muted" style="font-size:0.78rem;">Admin &bull; Yesterday</div>
-                            </div>
-                        </div>
+                        <div th:if="${#lists.isEmpty(recentBookings)}"
+                             class="text-center text-muted small py-3">No bookings yet.</div>
                     </div>
                 </div>
             </div>

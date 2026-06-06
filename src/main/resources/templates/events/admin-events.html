@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena Admin – Events</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active {
+            background: #dcfce7; color: #16a34a;
+            font-weight: 600; border-left: 3px solid #16a34a;
+        }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #dc2626; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+
+        .stat-card { border-radius: 10px; padding: 1rem 1.25rem; color: #fff; }
+        .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+        .stat-card .stat-label { font-size: .78rem; opacity: .9; margin-top: .15rem; }
+        .stat-card .stat-icon  { font-size: 1.8rem; opacity: .8; }
+        .card-blue   { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+        .card-green  { background: linear-gradient(135deg,#16a34a,#15803d); }
+        .card-gray   { background: linear-gradient(135deg,#6b7280,#4b5563); }
+
+        .status-select {
+            border: 1px solid #d1d5db; border-radius: 6px; padding: .25rem .5rem;
+            font-size: .75rem; background: #fff; cursor: pointer; outline: none;
+        }
+        .status-select:focus { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,.15); }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR (Admin) ══════════════════════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Admin Panel</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Dashboard</div>
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <div class="sidebar-section">Management</div>
+        <a th:href="@{/admin/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
+        <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">Promotions</div>
+        <a th:href="@{/admin/events}" class="active"><i class="bi bi-trophy"></i> Events</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle"
+             th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Admin</div>
+            <div class="role">ADMIN</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <h4><i class="bi bi-trophy text-success me-2"></i>Event Management</h4>
+            <p>Create, edit, and manage event promotions</p>
+        </div>
+        <a th:href="@{/admin/events/create}"
+           class="btn btn-sm fw-semibold"
+           style="background:#16a34a;color:#fff;">
+            <i class="bi bi-plus-lg me-1"></i>New Event
+        </a>
+    </div>
+
+    <div class="p-3 flex-grow-1">
+
+        <!-- Stat cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+                <div class="stat-card card-blue d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value" th:text="${totalEvents}">0</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                    <i class="bi bi-calendar-event stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="stat-card card-green d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value" th:text="${totalUpcoming}">0</div>
+                        <div class="stat-label">Upcoming</div>
+                    </div>
+                    <i class="bi bi-calendar-check stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="stat-card card-gray d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value" th:text="${totalPast}">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <i class="bi bi-calendar-x stat-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="fw-semibold small">All Events</span>
+                <span class="badge bg-secondary" th:text="${events.size() + ' events'}">0 events</span>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(events)}" class="text-center py-5">
+                <i class="bi bi-calendar-x" style="font-size:2.5rem;color:#d1d5db;"></i>
+                <p class="fw-semibold mt-2 mb-1">No events yet</p>
+                <p class="text-muted small mb-3">Create your first event promotion</p>
+                <a th:href="@{/admin/events/create}"
+                   class="btn btn-sm fw-semibold"
+                   style="background:#16a34a;color:#fff;">
+                    <i class="bi bi-plus-lg me-1"></i>Create Event
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(events)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Title</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Registrations</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="event : ${events}">
+                            <td class="ps-3 fw-semibold" th:text="${event.title}">Title</td>
+                            <td th:text="${event.eventDate}">2026-07-15</td>
+                            <td class="text-muted" th:text="${event.location ?: '—'}">Location</td>
+                            <td>
+                                <!-- Status change form -->
+                                <form th:action="@{/admin/events/status/{id}(id=${event.id})}"
+                                      method="post" class="d-inline">
+                                    <select name="status" class="status-select"
+                                            onchange="this.form.submit()"
+                                            th:value="${event.status}">
+                                        <option value="UPCOMING"
+                                                th:selected="${event.status == 'UPCOMING'}">UPCOMING</option>
+                                        <option value="COMPLETED"
+                                                th:selected="${event.status == 'COMPLETED'}">COMPLETED</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-muted border">
+                                    <i class="bi bi-people me-1"></i>
+                                    <span>—</span>
+                                </span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a th:href="@{/admin/events/edit/{id}(id=${event.id})}"
+                                   class="btn btn-sm btn-outline-secondary py-0 px-2 me-1"
+                                   style="font-size:.72rem;">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                <!-- Delete confirmation -->
+                                <form th:action="@{/admin/events/delete/{id}(id=${event.id})}"
+                                      method="post" class="d-inline"
+                                      th:id="${'del-form-' + event.id}">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger py-0 px-2"
+                                            style="font-size:.72rem;"
+                                            th:onclick="${'confirmDelete(' + event.id + ')'}">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmDelete(id) {
+    if (confirm('Delete this event? This action cannot be undone.')) {
+        document.getElementById('del-form-' + id).submit();
+    }
+}
+</script>
+</body>
+</html>

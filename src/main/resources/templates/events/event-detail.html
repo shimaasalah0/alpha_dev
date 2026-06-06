@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${'J Arena – ' + event.title}">J Arena – Event</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active {
+            background: #dcfce7; color: #16a34a;
+            font-weight: 600; border-left: 3px solid #16a34a;
+        }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #16a34a; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; gap: .75rem;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+
+        .event-hero {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 60%, #15803d 100%);
+            color: #fff; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+        }
+        .event-hero::before {
+            content: ''; position: absolute; top: -30px; right: -30px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
+        .hero-status-badge {
+            display: inline-block; padding: .25rem .75rem; border-radius: 999px;
+            font-size: .72rem; font-weight: 700; letter-spacing: .04em; margin-bottom: .6rem;
+        }
+        .badge-upcoming  { background: #bbf7d0; color: #14532d; }
+        .badge-completed { background: #e5e7eb; color: #374151; }
+
+        .meta-chip {
+            display: inline-flex; align-items: center; gap: .3rem;
+            background: rgba(255,255,255,.18); padding: .3rem .75rem;
+            border-radius: 999px; font-size: .78rem; margin-right: .4rem; margin-top: .3rem;
+        }
+
+        .content-card { background: #fff; border-radius: 10px; padding: 1.5rem; }
+        .reg-count-badge {
+            display: inline-flex; align-items: center; gap: .35rem;
+            background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a;
+            padding: .35rem .9rem; border-radius: 999px; font-size: .82rem; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Booking System</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Main Menu</div>
+        <a th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a th:href="@{/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">More</div>
+        <a th:href="@{/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+        <a th:href="@{/events}" class="active"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/teams}"><i class="bi bi-people"></i> Teams &amp; Tournaments</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle"
+             th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Ali Ahmad</div>
+            <div class="role" th:text="${currentUser.role}">CUSTOMER</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+    <!-- Breadcrumb header -->
+    <div class="page-header">
+        <a th:href="@{/events}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Events
+        </a>
+        <h4 th:text="${event.title}">Event Title</h4>
+    </div>
+
+    <div class="p-3 flex-grow-1">
+
+        <!-- Hero banner -->
+        <div class="event-hero rounded-3 mb-3 shadow-sm">
+            <span th:class="${'hero-status-badge ' + (event.status == 'UPCOMING' ? 'badge-upcoming' : 'badge-completed')}"
+                  th:text="${event.status}">UPCOMING</span>
+            <h2 class="fw-bold mb-2" th:text="${event.title}">Event Title</h2>
+            <div>
+                <span class="meta-chip">
+                    <i class="bi bi-calendar3"></i>
+                    <span th:text="${event.eventDate}">2026-07-15</span>
+                </span>
+                <span class="meta-chip" th:if="${event.location != null and !event.location.isEmpty()}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span th:text="${event.location}">Location</span>
+                </span>
+                <span class="meta-chip">
+                    <i class="bi bi-people-fill"></i>
+                    <span th:text="${registrationCount + ' registered'}">0 registered</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Description -->
+            <div class="col-md-8">
+                <div class="content-card shadow-sm">
+                    <h6 class="fw-bold mb-3 text-success">
+                        <i class="bi bi-info-circle me-1"></i>About This Event
+                    </h6>
+                    <p class="text-muted mb-0" style="line-height:1.7;"
+                       th:text="${event.description ?: 'No description available.'}">
+                        Description text here.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action panel -->
+            <div class="col-md-4">
+                <div class="content-card shadow-sm">
+                    <h6 class="fw-bold mb-3">Registration</h6>
+
+                    <div class="reg-count-badge mb-3">
+                        <i class="bi bi-people-fill"></i>
+                        <span th:text="${registrationCount}">0</span> people registered
+                    </div>
+
+                    <!-- UPCOMING: show register/unregister -->
+                    <div th:if="${event.status == 'UPCOMING'}">
+                        <!-- Already registered -->
+                        <div th:if="${isRegistered}">
+                            <div class="alert alert-success py-2 small mb-2">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                You are registered for this event!
+                            </div>
+                            <form th:action="@{/events/unregister/{id}(id=${event.id})}" method="post">
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>Cancel Registration
+                                </button>
+                            </form>
+                        </div>
+                        <!-- Not yet registered -->
+                        <div th:unless="${isRegistered}">
+                            <form th:action="@{/events/register/{id}(id=${event.id})}" method="post">
+                                <button type="submit"
+                                        class="btn w-100 fw-semibold"
+                                        style="background:#16a34a;color:#fff;">
+                                    <i class="bi bi-person-plus-fill me-1"></i>Register for Event
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- COMPLETED: show closed message -->
+                    <div th:unless="${event.status == 'UPCOMING'}">
+                        <div class="alert alert-secondary py-2 small mb-0">
+                            <i class="bi bi-lock me-1"></i>
+                            Registration is closed for this event.
+                        </div>
+                    </div>
+
+                    <hr class="my-3"/>
+                    <div class="small text-muted">
+                        <div class="mb-1">
+                            <i class="bi bi-calendar-event me-1 text-success"></i>
+                            <strong>Date:</strong>
+                            <span th:text="${event.eventDate}">2026-07-15</span>
+                        </div>
+                        <div th:if="${event.location != null and !event.location.isEmpty()}" class="mb-1">
+                            <i class="bi bi-geo-alt me-1 text-success"></i>
+                            <strong>Location:</strong>
+                            <span th:text="${event.location}">Location</span>
+                        </div>
+                        <div>
+                            <i class="bi bi-tag me-1 text-success"></i>
+                            <strong>Status:</strong>
+                            <span th:text="${event.status}">UPCOMING</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

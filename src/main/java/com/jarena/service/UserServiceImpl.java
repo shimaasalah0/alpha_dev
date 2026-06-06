@@ -33,4 +33,9 @@ public class UserServiceImpl implements UserService {
     public boolean emailExists(String email) {
         return userDao.emailExists(email);
     }
+
+    @Override
+    public long countAll() {
+        return userDao.countAll();
+    }
 }

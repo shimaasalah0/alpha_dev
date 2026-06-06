@@ -123,37 +123,19 @@
 
         <!-- Stat Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6">
                 <div class="stat-card card-blue d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">12</div>
+                        <div class="stat-value" th:text="${totalBookings}">0</div>
                         <div class="stat-label">Total Bookings</div>
                     </div>
                     <i class="bi bi-calendar3 stat-icon"></i>
                 </div>
             </div>
-            <div class="col-sm-6 col-xl-3">
-                <div class="stat-card card-green d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="stat-value">RM 480</div>
-                        <div class="stat-label">Monthly Revenue</div>
-                    </div>
-                    <i class="bi bi-cash-coin stat-icon"></i>
-                </div>
-            </div>
-            <div class="col-sm-6 col-xl-3">
-                <div class="stat-card card-purple d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="stat-value">5</div>
-                        <div class="stat-label">Active Users</div>
-                    </div>
-                    <i class="bi bi-people-fill stat-icon"></i>
-                </div>
-            </div>
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6">
                 <div class="stat-card card-orange d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value">3</div>
+                        <div class="stat-value" th:text="${availableFields}">0</div>
                         <div class="stat-label">Available Fields</div>
                     </div>
                     <i class="bi bi-geo-alt-fill stat-icon"></i>
@@ -178,23 +160,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="ps-4 text-muted">1</td>
-                            <td>Field A – Petaling Jaya</td>
-                            <td>2025-06-10</td>
-                            <td>08:00 – 10:00</td>
-                            <td><span class="badge bg-success">Confirmed</span></td>
+                        <tr th:each="b, i : ${upcomingBookings}">
+                            <td class="ps-4 text-muted" th:text="${i.count}">1</td>
+                            <td th:text="${b.field.name + ' – ' + b.field.location}">Field A</td>
+                            <td th:text="${b.bookingDate}">2026-06-10</td>
+                            <td th:text="${b.startTime + ' – ' + b.endTime}">08:00 – 10:00</td>
+                            <td>
+                                <span th:class="${'badge ' +
+                                    (b.status == 'CONFIRMED' ? 'bg-success' :
+                                    (b.status == 'PENDING'   ? 'bg-warning text-dark' :
+                                    'bg-secondary'))}"
+                                      th:text="${b.status}">Confirmed</span>
+                            </td>
                         </tr>
-                        <tr>
-                            <td class="ps-4 text-muted">2</td>
-                            <td>Field B – Shah Alam</td>
-                            <td>2025-06-14</td>
-                            <td>18:00 – 20:00</td>
-                            <td><span class="badge bg-warning text-dark">Pending</span></td>
-                        </tr>
-                        <tr>
+                        <tr th:if="${#lists.isEmpty(upcomingBookings)}">
                             <td colspan="5" class="text-center text-muted py-4 small">
-                                No more upcoming bookings.
+                                No upcoming bookings.
+                                <a th:href="@{/bookings/new}" class="text-success fw-semibold ms-1">Book now →</a>
                             </td>
                         </tr>
                     </tbody>
