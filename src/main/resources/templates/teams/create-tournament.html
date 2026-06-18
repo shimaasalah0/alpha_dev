@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena Admin – Create Tournament</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active { background: #dcfce7; color: #16a34a; font-weight: 600; border-left: 3px solid #16a34a; }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #dc2626; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Admin Panel</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Dashboard</div>
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <div class="sidebar-section">Management</div>
+        <a th:href="@{/admin/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
+        <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <a th:href="@{/admin/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+        <div class="sidebar-section">Promotions</div>
+        <a th:href="@{/admin/events}"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/admin/tournaments}" class="active"><i class="bi bi-people"></i> Tournaments</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle" th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Admin</div>
+            <div class="role">ADMIN</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <div class="page-header">
+        <div>
+            <h4><i class="bi bi-trophy text-success me-2"></i>Create Tournament</h4>
+            <p>Set up a new competition for registered teams</p>
+        </div>
+        <a th:href="@{/admin/tournaments}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+
+    <div class="p-4 flex-grow-1 d-flex justify-content-center">
+        <div class="w-100" style="max-width:600px;">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold border-bottom py-3">
+                    <i class="bi bi-trophy text-success me-2"></i>Tournament Details
+                </div>
+                <div class="card-body">
+
+                    <div th:if="${error}" class="alert alert-danger py-2 small mb-3" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i><span th:text="${error}">Error</span>
+                    </div>
+
+                    <form th:action="@{/admin/tournaments/create}" th:object="${tournament}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Tournament Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{name}" class="form-control"
+                                   placeholder="e.g. J Arena Summer Cup 2025" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Description</label>
+                            <textarea th:field="*{description}" class="form-control" rows="3"
+                                      placeholder="Describe the tournament format, rules, etc."></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Start Date <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{startDate}" class="form-control" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">End Date <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{endDate}" class="form-control" required/>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Max Teams <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{maxTeams}" class="form-control"
+                                       min="2" placeholder="e.g. 8" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Prize</label>
+                                <input type="text" th:field="*{prize}" class="form-control"
+                                       placeholder="e.g. RM 1000 + Trophy"/>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-trophy me-1"></i>Create Tournament
+                            </button>
+                            <a th:href="@{/admin/tournaments}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -18,16 +18,29 @@ public class AdminEventController {
     @Autowired
     private EventService eventService;
 
+    private static final java.util.Set<String> VALID_STATUSES =
+            java.util.Set.of("UPCOMING", "COMPLETED");
+
     // ── GET /admin/events ─────────────────────────────────────────────────────
     @GetMapping
     public String adminEvents(HttpSession session, Model model) {
         if (!AuthHelper.isAdmin(session)) return "redirect:/login";
 
-        model.addAttribute("events",        eventService.getAllEvents());
-        model.addAttribute("totalEvents",   eventService.getTotalEvents());
-        model.addAttribute("totalUpcoming", eventService.getTotalUpcoming());
-        model.addAttribute("totalPast",     eventService.getTotalPast());
-        model.addAttribute("currentUser",   AuthHelper.getLoggedInUser(session));
+        java.util.List<Event> events = eventService.getAllEvents();
+        java.util.Map<Long, Long> registrationCounts = new java.util.HashMap<>();
+        for (Event e : events) {
+            registrationCounts.put(e.getId(), eventService.getRegistrationCount(e.getId()));
+        }
+
+        long totalUpcoming = events.stream().filter(e -> "UPCOMING".equals(e.getStatus())).count();
+        long totalPast     = events.stream().filter(e -> "COMPLETED".equals(e.getStatus())).count();
+
+        model.addAttribute("events",              events);
+        model.addAttribute("totalEvents",         (long) events.size());
+        model.addAttribute("totalUpcoming",       totalUpcoming);
+        model.addAttribute("totalPast",           totalPast);
+        model.addAttribute("registrationCounts",  registrationCounts);
+        model.addAttribute("currentUser",         AuthHelper.getLoggedInUser(session));
         return "events/admin-events";
     }
 
@@ -71,14 +84,23 @@ public class AdminEventController {
     // ── POST /admin/events/edit/{id} ──────────────────────────────────────────
     @PostMapping("/edit/{id}")
     public String editEvent(@PathVariable long id,
-                            @ModelAttribute Event event,
+                            @ModelAttribute Event formEvent,
                             HttpSession session, Model model) {
         if (!AuthHelper.isAdmin(session)) return "redirect:/login";
 
-        event.setId(id);
+        Event existing = eventService.getEventById(id);
+        if (existing == null) return "redirect:/admin/events";
 
-        String error = eventService.updateEvent(event);
+        existing.setTitle(formEvent.getTitle());
+        existing.setDescription(formEvent.getDescription());
+        existing.setEventDate(formEvent.getEventDate());
+        existing.setLocation(formEvent.getLocation());
+        existing.setImageUrl(formEvent.getImageUrl());
+        existing.setStatus(formEvent.getStatus());
+
+        String error = eventService.updateEvent(existing);
         if (error != null) {
+            model.addAttribute("event", existing);
             model.addAttribute("error", error);
             return "events/edit-event";
         }
@@ -100,6 +122,7 @@ public class AdminEventController {
                                HttpSession session) {
         if (!AuthHelper.isAdmin(session)) return "redirect:/login";
 
+        if (!VALID_STATUSES.contains(status)) return "redirect:/admin/events";
         Event event = eventService.getEventById(id);
         if (event != null) {
             event.setStatus(status);

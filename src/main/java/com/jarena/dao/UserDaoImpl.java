@@ -54,4 +54,12 @@ public class UserDaoImpl implements UserDao {
                 .uniqueResult();
         return count != null ? count : 0L;
     }
+
+    @Override
+    @Transactional
+    public List<User> findAll() {
+        return sessionFactory.getCurrentSession()
+                .createQuery("FROM User u ORDER BY u.fullName ASC", User.class)
+                .getResultList();
+    }
 }

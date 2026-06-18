@@ -44,9 +44,9 @@ public class EventController {
 
         model.addAttribute("upcomingEvents",     upcomingEvents);
         model.addAttribute("pastEvents",         pastEvents);
-        model.addAttribute("totalEvents",        eventService.getTotalEvents());
-        model.addAttribute("totalUpcoming",      eventService.getTotalUpcoming());
-        model.addAttribute("totalPast",          eventService.getTotalPast());
+        model.addAttribute("totalEvents",        (long)(upcomingEvents.size() + pastEvents.size()));
+        model.addAttribute("totalUpcoming",      (long) upcomingEvents.size());
+        model.addAttribute("totalPast",          (long) pastEvents.size());
         model.addAttribute("currentUser",        user);
         model.addAttribute("registeredEventIds", registeredEventIds);
         model.addAttribute("registrationCounts", registrationCounts);
@@ -71,10 +71,20 @@ public class EventController {
 
     // ── POST /events/register/{id} ───────────────────────────────────────────
     @PostMapping("/events/register/{id}")
-    public String register(@PathVariable long id, HttpSession session) {
+    public String register(@PathVariable long id, HttpSession session, Model model) {
         if (!AuthHelper.isLoggedIn(session)) return "redirect:/login";
         User user = AuthHelper.getLoggedInUser(session);
-        eventService.registerUserForEvent(id, user.getId());
+        String error = eventService.registerUserForEvent(id, user.getId());
+        if (error != null) {
+            Event event = eventService.getEventById(id);
+            if (event == null) return "redirect:/events";
+            model.addAttribute("event",             event);
+            model.addAttribute("registrationCount", eventService.getRegistrationCount(id));
+            model.addAttribute("isRegistered",      eventService.isUserRegistered(id, user.getId()));
+            model.addAttribute("currentUser",       user);
+            model.addAttribute("error",             error);
+            return "events/event-detail";
+        }
         return "redirect:/events/" + id;
     }
 

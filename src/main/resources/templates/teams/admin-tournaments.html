@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena Admin – Tournaments</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active { background: #dcfce7; color: #16a34a; font-weight: 600; border-left: 3px solid #16a34a; }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #dc2626; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<!-- Admin Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Admin Panel</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Dashboard</div>
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <div class="sidebar-section">Management</div>
+        <a th:href="@{/admin/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
+        <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <a th:href="@{/admin/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+        <div class="sidebar-section">Promotions</div>
+        <a th:href="@{/admin/events}"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/admin/tournaments}" class="active"><i class="bi bi-people"></i> Tournaments</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle" th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Admin</div>
+            <div class="role">ADMIN</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <div class="page-header">
+        <div>
+            <h4><i class="bi bi-trophy text-success me-2"></i>Tournaments Management</h4>
+            <p>Create and manage tournaments and matches</p>
+        </div>
+        <a th:href="@{/admin/tournaments/create}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>New Tournament
+        </a>
+    </div>
+
+    <div class="p-3 flex-grow-1">
+
+        <!-- Tournaments Table -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="fw-semibold small"><i class="bi bi-trophy me-2 text-success"></i>All Tournaments</span>
+                <span class="badge bg-secondary" th:text="${tournaments.size() + ' total'}">0 total</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(tournaments)}" class="text-center py-5">
+                <i class="bi bi-trophy" style="font-size:2.5rem;color:#d1d5db;"></i>
+                <p class="fw-semibold mt-2 mb-1">No tournaments yet</p>
+                <p class="text-muted small">Create your first tournament to get started.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(tournaments)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Name</th>
+                            <th>Dates</th>
+                            <th>Teams</th>
+                            <th>Prize</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="t : ${tournaments}">
+                            <td class="ps-3 fw-semibold">
+                                <a th:href="@{/admin/tournaments/detail/{id}(id=${t.id})}"
+                                   th:text="${t.name}" class="text-decoration-none text-dark">Name</a>
+                            </td>
+                            <td class="text-muted">
+                                <span th:text="${#temporals.format(t.startDate, 'dd MMM')}">Start</span>
+                                –
+                                <span th:text="${#temporals.format(t.endDate, 'dd MMM yyyy')}">End</span>
+                            </td>
+                            <td th:text="${t.maxTeams + ' max'}">0</td>
+                            <td th:text="${t.prize ?: '—'}">Prize</td>
+                            <td>
+                                <span th:switch="${t.status}">
+                                    <span th:case="'UPCOMING'"  class="badge bg-info text-dark">Upcoming</span>
+                                    <span th:case="'ACTIVE'"    class="badge bg-success">Active</span>
+                                    <span th:case="'COMPLETED'" class="badge bg-secondary">Completed</span>
+                                    <span th:case="'CANCELLED'" class="badge bg-danger">Cancelled</span>
+                                    <span th:case="*"           class="badge bg-secondary" th:text="${t.status}">—</span>
+                                </span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <!-- Status update dropdown -->
+                                <div class="btn-group btn-group-sm me-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle py-0"
+                                            data-bs-toggle="dropdown" style="font-size:.72rem;">Status</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <form th:action="@{/admin/tournaments/status/{id}(id=${t.id})}" method="post">
+                                                <input type="hidden" name="status" value="UPCOMING"/>
+                                                <button type="submit" class="dropdown-item small">Set Upcoming</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form th:action="@{/admin/tournaments/status/{id}(id=${t.id})}" method="post">
+                                                <input type="hidden" name="status" value="ACTIVE"/>
+                                                <button type="submit" class="dropdown-item small">Set Active</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form th:action="@{/admin/tournaments/status/{id}(id=${t.id})}" method="post">
+                                                <input type="hidden" name="status" value="COMPLETED"/>
+                                                <button type="submit" class="dropdown-item small">Set Completed</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form th:action="@{/admin/tournaments/status/{id}(id=${t.id})}" method="post">
+                                                <input type="hidden" name="status" value="CANCELLED"/>
+                                                <button type="submit" class="dropdown-item small text-danger">Cancel</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <a th:href="@{/admin/tournaments/schedule/{id}(id=${t.id})}"
+                                   class="btn btn-sm btn-outline-success py-0 px-2 me-1" style="font-size:.72rem;">
+                                    <i class="bi bi-calendar-plus me-1"></i>Schedule
+                                </a>
+                                <a th:href="@{/admin/tournaments/edit/{id}(id=${t.id})}"
+                                   class="btn btn-sm btn-outline-primary py-0 px-2 me-1" style="font-size:.72rem;">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                <form th:action="@{/admin/tournaments/delete/{id}(id=${t.id})}"
+                                      method="post" class="d-inline"
+                                      th:id="${'del-t-' + t.id}">
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                                            style="font-size:.72rem;"
+                                            th:attr="data-id=${t.id}"
+                                            onclick="confirmDeleteTournament(this.dataset.id)">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upcoming Matches -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="small"><i class="bi bi-calendar-event me-2 text-success"></i>Upcoming Matches</span>
+                <span class="badge bg-secondary" th:text="${upcomingMatches.size() + ' matches'}">0 matches</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(upcomingMatches)}" class="text-center py-4">
+                <p class="text-muted small mb-0">No upcoming matches scheduled.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(upcomingMatches)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Match</th>
+                            <th>Tournament</th>
+                            <th>Date &amp; Time</th>
+                            <th>Field</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="m : ${upcomingMatches}">
+                            <td class="ps-3 fw-semibold">
+                                <span th:text="${m.homeTeam.name}">Home</span>
+                                <span class="text-muted mx-1">vs</span>
+                                <span th:text="${m.awayTeam.name}">Away</span>
+                            </td>
+                            <td th:text="${m.tournament.name}">Tournament</td>
+                            <td>
+                                <span th:text="${#temporals.format(m.matchDate, 'dd MMM yyyy')}">Date</span>
+                                <span class="text-muted ms-1" th:text="${#temporals.format(m.matchTime, 'HH:mm')}">Time</span>
+                            </td>
+                            <td th:text="${m.field != null ? m.field.name : '—'}">Field</td>
+                            <td class="text-end pe-3">
+                                <form th:action="@{/admin/tournaments/matches/delete/{id}(id=${m.id})}"
+                                      method="post" class="d-inline"
+                                      th:id="${'del-m-' + m.id}">
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                                            style="font-size:.72rem;"
+                                            th:attr="data-id=${m.id}"
+                                            onclick="confirmDeleteMatch(this.dataset.id)">
+                                        <i class="bi bi-trash me-1"></i>Cancel
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmDeleteTournament(id) {
+    if (confirm('Delete this tournament and all its matches and registrations?')) {
+        document.getElementById('del-t-' + id).submit();
+    }
+}
+function confirmDeleteMatch(id) {
+    if (confirm('Cancel this match?')) {
+        document.getElementById('del-m-' + id).submit();
+    }
+}
+</script>
+</body>
+</html>

@@ -52,6 +52,9 @@ public class EventServiceImpl implements EventService {
         if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
             return "Event title is required.";
         }
+        if (event.getEventDate() == null || event.getEventDate().isBefore(LocalDate.now())) {
+            return "Event date cannot be in the past.";
+        }
         eventDao.update(event);
         return null;
     }
@@ -82,11 +85,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public String registerUserForEvent(long eventId, long userId) {
+        Event event = eventDao.findById(eventId);
+        if (event == null) {
+            return "Event not found.";
+        }
+        if (!"UPCOMING".equals(event.getStatus())) {
+            return "Registration is not open for this event.";
+        }
         if (eventDao.isUserRegistered(eventId, userId)) {
             return "You are already registered for this event.";
         }
-        Event event = eventDao.findById(eventId);
-        User  user  = userDao.findById(userId);
+        User user = userDao.findById(userId);
 
         EventRegistration reg = new EventRegistration();
         reg.setEvent(event);

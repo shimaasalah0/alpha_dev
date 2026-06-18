@@ -1,8 +1,10 @@
 package com.jarena.controller;
 
 import com.jarena.model.Booking;
+import com.jarena.model.Event;
 import com.jarena.model.User;
 import com.jarena.service.BookingService;
+import com.jarena.service.EventService;
 import com.jarena.service.FieldService;
 import com.jarena.service.UserService;
 import com.jarena.util.AuthHelper;
@@ -20,8 +22,9 @@ import java.util.stream.Collectors;
 public class DashboardController {
 
     @Autowired private BookingService bookingService;
-    @Autowired private FieldService fieldService;
-    @Autowired private UserService userService;
+    @Autowired private FieldService   fieldService;
+    @Autowired private UserService    userService;
+    @Autowired private EventService   eventService;
 
     @GetMapping("/dashboard")
     public String customerDashboard(HttpSession session, Model model) {
@@ -36,10 +39,17 @@ public class DashboardController {
                 .sorted((a, b2) -> a.getBookingDate().compareTo(b2.getBookingDate()))
                 .collect(Collectors.toList());
 
-        model.addAttribute("user",            user);
-        model.addAttribute("totalBookings",   allBookings.size());
-        model.addAttribute("availableFields", fieldService.getAvailableFields().size());
+        // Registered upcoming events for this user
+        List<Event> allUpcomingEvents = eventService.getUpcomingEvents();
+        List<Event> registeredEvents = allUpcomingEvents.stream()
+                .filter(e -> eventService.isUserRegistered(e.getId(), user.getId()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("user",             user);
+        model.addAttribute("totalBookings",    allBookings.size());
+        model.addAttribute("availableFields",  fieldService.getAvailableFields().size());
         model.addAttribute("upcomingBookings", upcoming);
+        model.addAttribute("registeredEvents", registeredEvents);
         return "user-management/customer-dashboard";
     }
 

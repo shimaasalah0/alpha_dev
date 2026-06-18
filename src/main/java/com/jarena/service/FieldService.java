@@ -6,8 +6,10 @@ import java.util.List;
 public interface FieldService {
     List<Field> getAllFields();
     Field getFieldById(long id);
-    void addField(Field field);
-    void updateField(Field field);
-    void deleteField(long id);
+    String addField(Field field);
+    String updateField(Field field);
+    String deleteField(long id);
     List<Field> getAvailableFields();
+    long getTotalFields();
+    long getAvailableFieldsCount();
 }

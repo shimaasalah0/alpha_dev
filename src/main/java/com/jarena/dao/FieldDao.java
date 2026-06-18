@@ -10,4 +10,7 @@ public interface FieldDao {
     void update(Field field);
     void delete(long id);
     List<Field> findAvailable();
+    long countAll();
+    long countAvailable();
+    boolean existsByName(String name, Long excludeId);
 }

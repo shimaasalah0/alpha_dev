@@ -195,7 +195,12 @@
         <a th:href="@{/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
         <a th:href="@{/payments}"><i class="bi bi-credit-card"></i> Payments</a>
         <div class="sidebar-section">More</div>
-        <a th:href="@{/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+        <a th:href="@{/notifications}">
+            <i class="bi bi-bell"></i> Notifications
+            <span th:if="${unreadCount != null and unreadCount > 0}"
+                  th:text="${unreadCount}"
+                  class="badge bg-danger rounded-pill ms-auto"></span>
+        </a>
         <a th:href="@{/events}"><i class="bi bi-trophy"></i> Events</a>
         <a th:href="@{/teams}"><i class="bi bi-people"></i> Teams &amp; Tournaments</a>
     </nav>

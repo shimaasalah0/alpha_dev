@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>J Arena Admin – Events</title>
+    <title>J Arena Admin – Fields</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
@@ -58,20 +58,13 @@
         .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
         .stat-card .stat-label { font-size: .78rem; opacity: .9; margin-top: .15rem; }
         .stat-card .stat-icon  { font-size: 1.8rem; opacity: .8; }
-        .card-blue   { background: linear-gradient(135deg,#3b82f6,#2563eb); }
-        .card-green  { background: linear-gradient(135deg,#16a34a,#15803d); }
-        .card-gray   { background: linear-gradient(135deg,#6b7280,#4b5563); }
-
-        .status-select {
-            border: 1px solid #d1d5db; border-radius: 6px; padding: .25rem .5rem;
-            font-size: .75rem; background: #fff; cursor: pointer; outline: none;
-        }
-        .status-select:focus { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,.15); }
+        .card-blue  { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+        .card-green { background: linear-gradient(135deg,#16a34a,#15803d); }
     </style>
 </head>
 <body>
 
-<!-- ══ SIDEBAR (Admin) ══════════════════════════════════════════════════════ -->
+<!-- Sidebar -->
 <div class="sidebar">
     <div class="sidebar-brand">
         <div class="logo-line">&#9917; J Arena</div>
@@ -82,11 +75,11 @@
         <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
         <div class="sidebar-section">Management</div>
         <a th:href="@{/admin/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
-        <a th:href="@{/admin/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/admin/fields}" class="active"><i class="bi bi-geo-alt"></i> Fields</a>
         <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
         <a th:href="@{/admin/payments}"><i class="bi bi-credit-card"></i> Payments</a>
         <div class="sidebar-section">Promotions</div>
-        <a th:href="@{/admin/events}" class="active"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/admin/events}"><i class="bi bi-trophy"></i> Events</a>
     </nav>
     <div class="sidebar-user">
         <div class="avatar-circle"
@@ -101,126 +94,122 @@
     </div>
 </div>
 
-<!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
+<!-- Main -->
 <div class="main-wrap">
 
     <!-- Page header -->
     <div class="page-header">
         <div>
-            <h4><i class="bi bi-trophy text-success me-2"></i>Event Management</h4>
-            <p>Create, edit, and manage event promotions</p>
+            <h4><i class="bi bi-geo-alt text-success me-2"></i>Field Management</h4>
+            <p>Add, edit, and manage football fields</p>
         </div>
-        <a th:href="@{/admin/events/create}"
+        <a th:href="@{/admin/fields/create}"
            class="btn btn-sm fw-semibold"
            style="background:#16a34a;color:#fff;">
-            <i class="bi bi-plus-lg me-1"></i>New Event
+            <i class="bi bi-plus-lg me-1"></i>Add Field
         </a>
     </div>
 
     <div class="p-3 flex-grow-1">
 
+        <!-- Error alert -->
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:text="${param.error[0]}">Error</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <!-- Stat cards -->
         <div class="row g-3 mb-4">
-            <div class="col-sm-4">
+            <div class="col-sm-6">
                 <div class="stat-card card-blue d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value" th:text="${totalEvents}">0</div>
-                        <div class="stat-label">Total Events</div>
+                        <div class="stat-value" th:text="${totalFields}">0</div>
+                        <div class="stat-label">Total Fields</div>
                     </div>
-                    <i class="bi bi-calendar-event stat-icon"></i>
+                    <i class="bi bi-geo-alt stat-icon"></i>
                 </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
                 <div class="stat-card card-green d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-value" th:text="${totalUpcoming}">0</div>
-                        <div class="stat-label">Upcoming</div>
+                        <div class="stat-value" th:text="${availableCount}">0</div>
+                        <div class="stat-label">Available Fields</div>
                     </div>
-                    <i class="bi bi-calendar-check stat-icon"></i>
-                </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="stat-card card-gray d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="stat-value" th:text="${totalPast}">0</div>
-                        <div class="stat-label">Completed</div>
-                    </div>
-                    <i class="bi bi-calendar-x stat-icon"></i>
+                    <i class="bi bi-check-circle stat-icon"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Events table -->
+        <!-- Fields table -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3">
-                <span class="fw-semibold small">All Events</span>
-                <span class="badge bg-secondary" th:text="${events.size() + ' events'}">0 events</span>
+                <span class="fw-semibold small">All Fields</span>
+                <span class="badge bg-secondary" th:text="${fields.size() + ' fields'}">0 fields</span>
             </div>
 
             <!-- Empty state -->
-            <div th:if="${#lists.isEmpty(events)}" class="text-center py-5">
-                <i class="bi bi-calendar-x" style="font-size:2.5rem;color:#d1d5db;"></i>
-                <p class="fw-semibold mt-2 mb-1">No events yet</p>
-                <p class="text-muted small mb-3">Create your first event promotion</p>
-                <a th:href="@{/admin/events/create}"
+            <div th:if="${#lists.isEmpty(fields)}" class="text-center py-5">
+                <i class="bi bi-geo-alt" style="font-size:2.5rem;color:#d1d5db;"></i>
+                <p class="fw-semibold mt-2 mb-1">No fields yet</p>
+                <p class="text-muted small mb-3">Add your first football field</p>
+                <a th:href="@{/admin/fields/create}"
                    class="btn btn-sm fw-semibold"
                    style="background:#16a34a;color:#fff;">
-                    <i class="bi bi-plus-lg me-1"></i>Create Event
+                    <i class="bi bi-plus-lg me-1"></i>Add Field
                 </a>
             </div>
 
             <!-- Table -->
-            <div th:unless="${#lists.isEmpty(events)}" class="table-responsive">
+            <div th:unless="${#lists.isEmpty(fields)}" class="table-responsive">
                 <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-3">Title</th>
-                            <th>Date</th>
+                            <th class="ps-3">Name</th>
                             <th>Location</th>
+                            <th>Price / Hour</th>
                             <th>Status</th>
-                            <th>Registrations</th>
                             <th class="text-end pe-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="event : ${events}">
-                            <td class="ps-3 fw-semibold" th:text="${event.title}">Title</td>
-                            <td th:text="${event.eventDate}">2026-07-15</td>
-                            <td class="text-muted" th:text="${event.location ?: '—'}">Location</td>
+                        <tr th:each="field : ${fields}">
+                            <td class="ps-3 fw-semibold" th:text="${field.name}">Field</td>
+                            <td class="text-muted" th:text="${field.location ?: '—'}">Location</td>
                             <td>
-                                <!-- Status change form -->
-                                <form th:action="@{/admin/events/status/{id}(id=${event.id})}"
-                                      method="post" class="d-inline">
-                                    <select name="status" class="status-select"
-                                            onchange="this.form.submit()"
-                                            th:value="${event.status}">
-                                        <option value="UPCOMING"
-                                                th:selected="${event.status == 'UPCOMING'}">UPCOMING</option>
-                                        <option value="COMPLETED"
-                                                th:selected="${event.status == 'COMPLETED'}">COMPLETED</option>
-                                    </select>
-                                </form>
+                                RM <span th:text="${#numbers.formatDecimal(field.pricePerHour, 1, 2)}">0.00</span>
                             </td>
                             <td>
-                                <span class="badge bg-light text-muted border">
-                                    <i class="bi bi-people me-1"></i>
-                                    <span th:text="${registrationCounts[event.id] ?: 0}">0</span>
-                                </span>
+                                <span th:if="${field.available}"
+                                      class="badge bg-success-subtle text-success border border-success">Available</span>
+                                <span th:unless="${field.available}"
+                                      class="badge bg-secondary-subtle text-secondary border">Unavailable</span>
                             </td>
                             <td class="text-end pe-3">
-                                <a th:href="@{/admin/events/edit/{id}(id=${event.id})}"
+                                <a th:href="@{/admin/fields/edit/{id}(id=${field.id})}"
                                    class="btn btn-sm btn-outline-secondary py-0 px-2 me-1"
                                    style="font-size:.72rem;">
                                     <i class="bi bi-pencil me-1"></i>Edit
                                 </a>
-                                <!-- Delete confirmation -->
-                                <form th:action="@{/admin/events/delete/{id}(id=${event.id})}"
+                                <!-- Toggle availability -->
+                                <form th:action="@{/admin/fields/toggle/{id}(id=${field.id})}"
+                                      method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm py-0 px-2 me-1"
+                                            th:classappend="${field.available} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                            style="font-size:.72rem;">
+                                        <i th:class="${field.available} ? 'bi bi-eye-slash me-1' : 'bi bi-eye me-1'"></i>
+                                        <span th:text="${field.available} ? 'Disable' : 'Enable'">Toggle</span>
+                                    </button>
+                                </form>
+                                <!-- Delete -->
+                                <form th:action="@{/admin/fields/delete/{id}(id=${field.id})}"
                                       method="post" class="d-inline"
-                                      th:id="${'del-form-' + event.id}">
+                                      th:id="${'del-form-' + field.id}">
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger py-0 px-2"
                                             style="font-size:.72rem;"
-                                            th:attr="data-id=${event.id}"
+                                            th:attr="data-id=${field.id}"
                                             onclick="confirmDelete(this.dataset.id)">
                                         <i class="bi bi-trash me-1"></i>Delete
                                     </button>
@@ -242,7 +231,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function confirmDelete(id) {
-    if (confirm('Delete this event? This action cannot be undone.')) {
+    if (confirm('Delete this field? This action cannot be undone.')) {
         document.getElementById('del-form-' + id).submit();
     }
 }

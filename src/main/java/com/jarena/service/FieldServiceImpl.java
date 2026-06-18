@@ -24,22 +24,60 @@ public class FieldServiceImpl implements FieldService {
     }
 
     @Override
-    public void addField(Field field) {
+    public String addField(Field field) {
+        if (field.getName() == null || field.getName().trim().isEmpty()) {
+            return "Field name is required.";
+        }
+        if (field.getPricePerHour() <= 0) {
+            return "Price per hour must be greater than 0.";
+        }
+        if (fieldDao.existsByName(field.getName().trim(), null)) {
+            return "A field with this name already exists.";
+        }
+        field.setName(field.getName().trim());
+        field.setAvailable(true);
         fieldDao.save(field);
+        return null;
     }
 
     @Override
-    public void updateField(Field field) {
+    public String updateField(Field field) {
+        if (field.getName() == null || field.getName().trim().isEmpty()) {
+            return "Field name is required.";
+        }
+        if (field.getPricePerHour() <= 0) {
+            return "Price per hour must be greater than 0.";
+        }
+        if (fieldDao.existsByName(field.getName().trim(), field.getId())) {
+            return "A field with this name already exists.";
+        }
+        field.setName(field.getName().trim());
         fieldDao.update(field);
+        return null;
     }
 
     @Override
-    public void deleteField(long id) {
-        fieldDao.delete(id);
+    public String deleteField(long id) {
+        try {
+            fieldDao.delete(id);
+            return null;
+        } catch (IllegalStateException e) {
+            return e.getMessage();
+        }
     }
 
     @Override
     public List<Field> getAvailableFields() {
         return fieldDao.findAvailable();
+    }
+
+    @Override
+    public long getTotalFields() {
+        return fieldDao.countAll();
+    }
+
+    @Override
+    public long getAvailableFieldsCount() {
+        return fieldDao.countAvailable();
     }
 }

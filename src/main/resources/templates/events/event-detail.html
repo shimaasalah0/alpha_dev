@@ -168,6 +168,11 @@
                 <div class="content-card shadow-sm">
                     <h6 class="fw-bold mb-3">Registration</h6>
 
+                    <div th:if="${error}" class="alert alert-warning py-2 small mb-2">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        <span th:text="${error}">Error</span>
+                    </div>
+
                     <div class="reg-count-badge mb-3">
                         <i class="bi bi-people-fill"></i>
                         <span th:text="${registrationCount}">0</span> people registered

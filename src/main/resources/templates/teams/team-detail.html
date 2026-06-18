@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – Team Detail</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active { background: #dcfce7; color: #16a34a; font-weight: 600; border-left: 3px solid #16a34a; }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #16a34a; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+        .stat-card { background: #fff; border-radius: 10px; padding: 1rem 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.07); text-align: center; }
+        .stat-card .stat-val { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+        .stat-card .stat-lbl { font-size: .72rem; color: #6b7280; margin-top: .25rem; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Booking System</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Main Menu</div>
+        <a th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a th:href="@{/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/payments}"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">More</div>
+        <a th:href="@{/notifications}">
+            <i class="bi bi-bell"></i> Notifications
+            <span th:if="${unreadCount != null and unreadCount > 0}"
+                  th:text="${unreadCount}"
+                  class="badge bg-danger rounded-pill ms-auto"></span>
+        </a>
+        <a th:href="@{/events}"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/teams}" class="active"><i class="bi bi-people"></i> Teams &amp; Tournaments</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle" th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">User</div>
+            <div class="role" th:text="${currentUser.role}">CUSTOMER</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <div class="page-header">
+        <div>
+            <h4>
+                <i class="bi bi-shield-fill text-success me-2"></i>
+                <span th:text="${team.name}">Team Name</span>
+                <span th:if="${isCaptain}" class="badge bg-warning text-dark fs-6 ms-2">Captain</span>
+            </h4>
+            <p th:text="${team.description ?: 'No description provided.'}">Description</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <!-- Leave team (non-captain members) -->
+            <form th:if="${isUserMember and !isCaptain}"
+                  th:action="@{/teams/leave/{id}(id=${team.id})}" method="post">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        th:attr="data-id=${team.id}"
+                        onclick="confirmLeave(this.dataset.id)">
+                    <i class="bi bi-box-arrow-left me-1"></i>Leave Team
+                </button>
+            </form>
+            <!-- Delete team (captain) -->
+            <form th:if="${isCaptain}"
+                  th:action="@{/teams/delete/{id}(id=${team.id})}" method="post" id="deleteForm">
+                <button type="button" class="btn btn-danger btn-sm"
+                        onclick="confirmDeleteTeam()">
+                    <i class="bi bi-trash me-1"></i>Delete Team
+                </button>
+            </form>
+            <a th:href="@{/teams}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+    </div>
+
+    <div class="p-3 flex-grow-1">
+
+        <!-- Error alert -->
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show py-2 small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${param.error}">Error</span>
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Stats row -->
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-val text-success" th:text="${team.wins}">0</div>
+                    <div class="stat-lbl">Wins</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-val text-danger" th:text="${team.losses}">0</div>
+                    <div class="stat-lbl">Losses</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-val text-secondary" th:text="${team.draws}">0</div>
+                    <div class="stat-lbl">Draws</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-val text-warning" th:text="${team.points}">0</div>
+                    <div class="stat-lbl">Points</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Members -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white fw-semibold border-bottom py-2 px-3">
+                        <i class="bi bi-people me-2 text-success"></i>Members
+                        <span class="badge bg-secondary ms-1" th:text="${members.size()}">0</span>
+                    </div>
+                    <div th:if="${#lists.isEmpty(members)}" class="text-center py-4">
+                        <p class="text-muted small mb-0">No members yet.</p>
+                    </div>
+                    <ul th:unless="${#lists.isEmpty(members)}" class="list-group list-group-flush">
+                        <li th:each="m : ${members}" class="list-group-item d-flex align-items-center gap-2 py-2 px-3">
+                            <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
+                                 style="width:32px;height:32px;flex-shrink:0;">
+                                <span class="fw-bold text-success small"
+                                      th:text="${m.user.fullName.substring(0,1).toUpperCase()}">A</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="small fw-semibold" th:text="${m.user.fullName}">Name</div>
+                                <div class="text-muted" style="font-size:.72rem;">
+                                    Joined <span th:text="${#temporals.format(m.joinedAt, 'dd MMM yyyy')}">Date</span>
+                                </div>
+                            </div>
+                            <span th:if="${m.user.id == team.captain.id}" class="badge bg-warning text-dark">Captain</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Match History -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white fw-semibold border-bottom py-2 px-3">
+                        <i class="bi bi-calendar-check me-2 text-success"></i>Match History
+                    </div>
+                    <div th:if="${#lists.isEmpty(matches)}" class="text-center py-4">
+                        <p class="text-muted small mb-0">No matches played yet.</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(matches)}" class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Match</th>
+                                    <th>Date</th>
+                                    <th>Result</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="m : ${matches}">
+                                    <td class="ps-3">
+                                        <span th:text="${m.homeTeam.name}">Home</span>
+                                        <span class="text-muted mx-1">vs</span>
+                                        <span th:text="${m.awayTeam.name}">Away</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(m.matchDate, 'dd MMM')}">Date</td>
+                                    <td>
+                                        <span th:if="${m.homeScore != null}"
+                                              th:text="${m.homeScore + ' - ' + m.awayScore}"
+                                              class="fw-semibold">0-0</span>
+                                        <span th:unless="${m.homeScore != null}" class="text-muted">—</span>
+                                    </td>
+                                    <td>
+                                        <span th:switch="${m.status}">
+                                            <span th:case="'SCHEDULED'" class="badge bg-info text-dark">Scheduled</span>
+                                            <span th:case="'COMPLETED'" class="badge bg-success">Done</span>
+                                            <span th:case="*"           class="badge bg-secondary" th:text="${m.status}">—</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Join button (for users not in any team) -->
+        <div th:if="${!userHasTeam}" class="mt-3 text-center">
+            <form th:action="@{/teams/join/{id}(id=${team.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="bi bi-person-plus me-1"></i>Join This Team
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmLeave(id) {
+    if (confirm('Are you sure you want to leave this team?')) {
+        document.querySelector('form[action*="/teams/leave/' + id + '"]').submit();
+    }
+}
+function confirmDeleteTeam() {
+    if (confirm('Delete this team? This will remove all members and tournament registrations.')) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+</body>
+</html>
