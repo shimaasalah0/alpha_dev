@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – Payments</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        .sidebar {
+            width: 240px; min-height: 100vh; background: #fff;
+            border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand { padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        .sidebar-brand .logo-line { font-size: 1.2rem; font-weight: 700; color: #16a34a; }
+        .sidebar-brand .sub-line  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+        .sidebar-section {
+            padding: .6rem 1.4rem .2rem; font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em; color: #9ca3af; margin-top: .4rem;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .62rem 1.4rem; color: #4b5563; text-decoration: none;
+            font-size: .875rem; transition: background .12s;
+        }
+        .sidebar nav a:hover { background: #f0fdf4; color: #16a34a; }
+        .sidebar nav a.active {
+            background: #dcfce7; color: #16a34a;
+            font-weight: 600; border-left: 3px solid #16a34a;
+        }
+        .sidebar nav a.active i { color: #16a34a; }
+        .sidebar-user {
+            margin-top: auto; padding: .9rem 1.4rem; border-top: 1px solid #e5e7eb;
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%; background: #16a34a; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .85rem; flex-shrink: 0;
+        }
+        .sidebar-user .name  { font-size: .8rem; font-weight: 600; color: #111827; line-height: 1.2; }
+        .sidebar-user .role  { font-size: .7rem; color: #9ca3af; }
+        .sidebar-user .logout-btn { margin-left: auto; color: #9ca3af; text-decoration: none; font-size: 1rem; }
+        .sidebar-user .logout-btn:hover { color: #dc2626; }
+
+        .main-wrap { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1.1rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-header h4 { margin: 0; font-weight: 700; font-size: 1.1rem; color: #111827; }
+        .page-header p  { margin: .1rem 0 0; font-size: .8rem; color: #6b7280; }
+
+        .filter-bar {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: 0 1.75rem; display: flex; gap: .25rem;
+        }
+        .filter-bar a {
+            padding: .65rem 1rem; font-size: .85rem; font-weight: 500;
+            color: #6b7280; text-decoration: none;
+            border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+        }
+        .filter-bar a:hover { color: #16a34a; }
+        .filter-bar a.tab-active { color: #16a34a; border-bottom-color: #16a34a; font-weight: 600; }
+
+        .invoice-mono { font-family: 'Courier New', monospace; font-size: .8rem; color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-line">&#9917; J Arena</div>
+        <div class="sub-line">Booking System</div>
+    </div>
+    <nav class="pt-1">
+        <div class="sidebar-section">Main Menu</div>
+        <a th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a th:href="@{/bookings}"><i class="bi bi-calendar-check"></i> Bookings</a>
+        <a th:href="@{/fields}"><i class="bi bi-geo-alt"></i> Fields</a>
+        <a th:href="@{/payments}" class="active"><i class="bi bi-credit-card"></i> Payments</a>
+        <div class="sidebar-section">More</div>
+        <a th:href="@{/notifications}"><i class="bi bi-bell"></i> Notifications</a>
+        <a th:href="@{/events}"><i class="bi bi-trophy"></i> Events</a>
+        <a th:href="@{/teams}"><i class="bi bi-people"></i> Teams &amp; Tournaments</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar-circle"
+             th:text="${currentUser.fullName.substring(0,1).toUpperCase()}">A</div>
+        <div>
+            <div class="name" th:text="${currentUser.fullName}">Ahmad Ali</div>
+            <div class="role" th:text="${currentUser.role}">CUSTOMER</div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ══ MAIN CONTENT ═════════════════════════════════════════════════════════ -->
+<div class="main-wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <h4><i class="bi bi-credit-card me-2 text-success"></i>Payments</h4>
+            <p>View your transaction history and invoices</p>
+        </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-bar">
+        <a th:href="@{/payments}" th:class="${activeStatus == 'ALL'} ? 'tab-active' : ''">All</a>
+        <a th:href="@{/payments(status='PAID')}"     th:class="${activeStatus == 'PAID'}     ? 'tab-active' : ''">Paid</a>
+        <a th:href="@{/payments(status='PENDING')}"  th:class="${activeStatus == 'PENDING'}  ? 'tab-active' : ''">Pending</a>
+        <a th:href="@{/payments(status='REFUNDED')}" th:class="${activeStatus == 'REFUNDED'} ? 'tab-active' : ''">Refunded</a>
+    </div>
+
+    <div class="p-3 flex-grow-1">
+
+        <!-- Summary card -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:48px;height:48px;background:#dcfce7;">
+                    <i class="bi bi-cash-stack text-success fs-5"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Total Paid</div>
+                    <div class="fw-bold fs-5 text-success">
+                        RM <span th:text="${#numbers.formatDecimal(totalPaid, 1, 2)}">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-2 px-3">
+                <span class="fw-semibold small">
+                    <i class="bi bi-list-ul text-success me-2"></i>Transactions
+                </span>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(payments)}" class="text-center py-5">
+                <i class="bi bi-receipt" style="font-size:2.5rem;color:#d1d5db;"></i>
+                <p class="fw-semibold mt-2 mb-1">No transactions found</p>
+                <p class="text-muted small">Your payment history will appear here.</p>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(payments)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Invoice ID</th>
+                            <th>Field</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${payments}">
+                            <td class="ps-3">
+                                <span class="invoice-mono" th:text="${p.invoiceId}">INV-2026-001</span>
+                            </td>
+                            <td th:text="${p.booking.field.name}">Arena A</td>
+                            <td th:text="${#temporals.format(p.paymentDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                            <td>
+                                <span class="fw-bold">
+                                    RM <span th:text="${#numbers.formatDecimal(p.amount, 1, 2)}">0.00</span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${p.paymentStatus == 'PAID'}"
+                                      class="badge bg-success">Paid</span>
+                                <span th:if="${p.paymentStatus == 'PENDING'}"
+                                      class="badge bg-warning text-dark">Pending</span>
+                                <span th:if="${p.paymentStatus == 'REFUNDED'}"
+                                      class="badge bg-danger">Refunded</span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <th:block th:if="${p.paymentStatus == 'PENDING'}">
+                                        <form th:action="@{/payments/pay/{id}(id=${p.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-success btn-sm py-0 px-2"
+                                                    style="font-size:.72rem;">
+                                                <i class="bi bi-credit-card me-1"></i>Pay Now
+                                            </button>
+                                        </form>
+                                    </th:block>
+                                    <a th:href="@{/payments/{id}(id=${p.id})}"
+                                       class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                       style="font-size:.72rem;">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center py-3 border-top bg-white mt-auto">
+        <small class="text-muted">&copy; 2025 J Arena. All rights reserved.</small>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

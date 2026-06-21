@@ -4,6 +4,7 @@ import com.jarena.model.Booking;
 import com.jarena.model.User;
 import com.jarena.service.BookingService;
 import com.jarena.service.FieldService;
+import com.jarena.service.PaymentService;
 import com.jarena.util.AuthHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +25,9 @@ public class BookingController {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     // ── GET /bookings ────────────────────────────────────────────────────────
     @GetMapping("/bookings")
@@ -130,6 +134,8 @@ public class BookingController {
             model.addAttribute("booking", b);
             return "bookings/new-booking";
         }
+
+        paymentService.createPayment(b.getId(), user.getId(), b.getTotalPrice());
 
         return "redirect:/bookings";
     }
