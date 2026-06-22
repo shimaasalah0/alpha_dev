@@ -3,3 +3,5 @@ target/
 *.war
 *.jar
 .DS_Store
+tools/
+.vscode/
