@@ -18,9 +18,10 @@ public class AuthController {
 
     @GetMapping("/")
     public String root(HttpSession session) {
-        return AuthHelper.isLoggedIn(session)
-                ? (AuthHelper.isAdmin(session) ? "redirect:/admin/dashboard" : "redirect:/dashboard")
-                : "redirect:/login";
+        if (AuthHelper.isLoggedIn(session)) {
+            return AuthHelper.isAdmin(session) ? "redirect:/admin/dashboard" : "redirect:/dashboard";
+        }
+        return "home";
     }
 
     @GetMapping("/login")

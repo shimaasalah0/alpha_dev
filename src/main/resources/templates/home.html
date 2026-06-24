@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>J Arena – Football Field Booking</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── Field hero background ── */
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,0.52) 0%, rgba(0,20,0,0.68) 100%),
+                url('/alpha_dev/static/images/jarena-bg.jpg') center center / cover no-repeat;
+            background-color: #1a5c2a;
+        }
+
+        /* Centre circle */
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border: 3px solid rgba(255,255,255,0.12);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* Centre line */
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            background: rgba(255,255,255,0.08);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        /* ── Logo badge ── */
+        .logo-badge {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 8px 32px rgba(22,163,74,0.45);
+            margin-bottom: 1.25rem;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(22,163,74,0.45); }
+            50%       { box-shadow: 0 8px 48px rgba(22,163,74,0.75); }
+        }
+
+        /* ── Headline ── */
+        .headline {
+            color: #ffffff;
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+            line-height: 1.1;
+        }
+
+        .headline span {
+            color: #4ade80;
+        }
+
+        .tagline {
+            color: rgba(255,255,255,0.72);
+            font-size: 1.05rem;
+            margin-top: 0.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Action cards ── */
+        .action-wrap {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-card {
+            background: rgba(255,255,255,0.07);
+            border: 1.5px solid rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            text-align: center;
+            width: 220px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.25s, background 0.25s, border-color 0.25s;
+            text-decoration: none;
+        }
+
+        .action-card:hover {
+            transform: translateY(-6px);
+            background: rgba(22,163,74,0.22);
+            border-color: #4ade80;
+        }
+
+        .action-card .card-icon {
+            font-size: 2.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .action-card .card-title {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .action-card .card-desc {
+            color: rgba(255,255,255,0.60);
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
+        /* Login card accent */
+        .action-card.login-card .card-icon { color: #4ade80; }
+        /* Register card accent */
+        .action-card.register-card .card-icon { color: #86efac; }
+
+        /* ── Features strip ── */
+        .features {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .feature-item {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .feature-item i { color: #4ade80; }
+
+        /* ── Footer note ── */
+        .foot-note {
+            position: absolute;
+            bottom: 1.25rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+
+    <!-- Logo -->
+    <div class="logo-badge">&#9917;</div>
+
+    <!-- Headline -->
+    <h1 class="headline text-center">J <span>Arena</span></h1>
+    <p class="tagline text-center">Football Field Booking System</p>
+
+    <!-- Two action cards -->
+    <div class="action-wrap">
+
+        <!-- Sign In -->
+        <a th:href="@{/login}" class="action-card login-card">
+            <div class="card-icon"><i class="bi bi-box-arrow-in-right"></i></div>
+            <div class="card-title">Sign In</div>
+            <div class="card-desc">Already have an account? Access your bookings and dashboard.</div>
+        </a>
+
+        <!-- Register -->
+        <a th:href="@{/register}" class="action-card register-card">
+            <div class="card-icon"><i class="bi bi-person-plus"></i></div>
+            <div class="card-title">Register</div>
+            <div class="card-desc">New here? Create an account and start booking fields today.</div>
+        </a>
+
+    </div>
+
+    <!-- Feature pills -->
+    <div class="features">
+        <span class="feature-item"><i class="bi bi-calendar-check"></i> Easy Booking</span>
+        <span class="feature-item"><i class="bi bi-trophy"></i> Tournaments</span>
+        <span class="feature-item"><i class="bi bi-people"></i> Team Management</span>
+        <span class="feature-item"><i class="bi bi-lightning"></i> Instant Confirmation</span>
+    </div>
+
+    <p class="foot-note">&#169; 2025 J Arena &mdash; All rights reserved</p>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
