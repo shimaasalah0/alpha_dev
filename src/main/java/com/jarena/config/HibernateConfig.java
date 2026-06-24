@@ -31,7 +31,8 @@ public class HibernateConfig {
 
         String host     = System.getenv("MYSQLHOST");
         String port     = System.getenv("MYSQLPORT");
-        String database = System.getenv("MYSQLDATABASE");
+        String database = System.getenv("MYSQL_DATABASE") != null
+                        ? System.getenv("MYSQL_DATABASE") : System.getenv("MYSQLDATABASE");
         String user     = System.getenv("MYSQLUSER");
         String password = System.getenv("MYSQLPASSWORD");
 
