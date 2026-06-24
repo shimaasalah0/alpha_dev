@@ -27,10 +27,25 @@ public class HibernateConfig {
     @Bean
     public DataSource dataSource() {
         BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName(env.getProperty("db.driver"));
-        ds.setUrl(env.getProperty("db.url"));
-        ds.setUsername(env.getProperty("db.username"));
-        ds.setPassword(env.getProperty("db.password"));
+        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+
+        String host     = System.getenv("MYSQLHOST");
+        String port     = System.getenv("MYSQLPORT");
+        String database = System.getenv("MYSQLDATABASE");
+        String user     = System.getenv("MYSQLUSER");
+        String password = System.getenv("MYSQLPASSWORD");
+
+        if (host != null && !host.isEmpty()) {
+            ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database
+                    + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+            ds.setUsername(user);
+            ds.setPassword(password);
+        } else {
+            ds.setUrl(env.getProperty("db.url"));
+            ds.setUsername(env.getProperty("db.username"));
+            ds.setPassword(env.getProperty("db.password"));
+        }
+
         ds.setInitialSize(5);
         ds.setMaxTotal(20);
         return ds;
