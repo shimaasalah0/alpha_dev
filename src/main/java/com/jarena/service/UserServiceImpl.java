@@ -31,6 +31,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean resetPassword(String email, String newPassword) {
+        if (!userDao.emailExists(email)) {
+            return false;
+        }
+        userDao.updatePassword(email, newPassword);
+        return true;
+    }
+
+    @Override
     public boolean emailExists(String email) {
         return userDao.emailExists(email);
     }
