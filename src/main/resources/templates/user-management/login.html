@@ -12,17 +12,11 @@
         body {
             background-color: #f0fdf4;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 2rem 1rem;
         }
-        .auth-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(22,163,74,0.12);
-            width: 100%;
-            max-width: 420px;
-            padding: 2.5rem 2rem;
+        .page-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
         }
         .icon-box {
             width: 64px;
@@ -32,86 +26,174 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem auto;
             font-size: 2rem;
             color: #fff;
+        }
+
+        /* Carousel */
+        #arenaCarousel .carousel-inner {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(21,128,61,0.18);
+            max-height: 320px;
+        }
+        #arenaCarousel .carousel-inner img {
+            object-fit: cover;
+            height: 320px;
+            width: 100%;
+        }
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 40px;
+            height: 40px;
+            background: rgba(21,128,61,0.82);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 1;
+        }
+        .carousel-control-prev { left: 12px; }
+        .carousel-control-next { right: 12px; }
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover { background: #15803d; }
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon { width: 18px; height: 18px; }
+        .carousel-caption-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(21,128,61,0.72));
+            padding: 1.5rem 1.25rem 0.75rem;
+            text-align: center;
+        }
+        .carousel-caption-bar p {
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Auth card */
+        .auth-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(22,163,74,0.12);
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem 2rem;
         }
         .nav-tabs .nav-link.active {
             color: #16a34a;
             border-bottom: 2px solid #16a34a;
             font-weight: 600;
         }
-        .nav-tabs .nav-link {
-            color: #6b7280;
-            border: none;
-        }
-        .btn-green {
-            background-color: #16a34a;
-            color: #fff;
-            border: none;
-        }
+        .nav-tabs .nav-link { color: #6b7280; border: none; }
+        .btn-green { background-color: #16a34a; color: #fff; border: none; }
         .btn-green:hover { background-color: #15803d; color: #fff; }
         .form-control:focus { border-color: #16a34a; box-shadow: 0 0 0 0.2rem rgba(22,163,74,0.2); }
     </style>
 </head>
 <body>
-<div class="auth-card">
-    <!-- Icon -->
-    <div class="icon-box">&#9917;</div>
+<div class="page-wrapper">
 
     <!-- Title -->
-    <h3 class="text-center fw-bold mb-0" style="color:#15803d;">J Arena</h3>
-    <p class="text-center text-muted small mb-3">Football Field Booking System</p>
-
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4 justify-content-center border-0">
-        <li class="nav-item">
-            <a class="nav-link active" th:href="@{/login}">Login</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/register}">Register</a>
-        </li>
-    </ul>
-
-    <!-- Error alert -->
-    <div th:if="${error}" class="alert alert-danger alert-dismissible py-2 small" role="alert">
-        <i class="bi bi-exclamation-circle me-1"></i>
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    <div class="text-center mb-4">
+        <div class="icon-box mx-auto mb-2">&#9917;</div>
+        <h3 class="fw-bold mb-0" style="color:#15803d;">J Arena</h3>
+        <p class="text-muted small mb-0">Football Field Booking System</p>
     </div>
 
-    <!-- Success alert -->
-    <div th:if="${param.registered}" class="alert alert-success py-2 small" role="alert">
-        <i class="bi bi-check-circle me-1"></i>
-        Account created successfully! Please sign in.
-    </div>
-
-    <!-- Form -->
-    <form th:action="@{/login}" method="post">
-        <div class="mb-3">
-            <label for="email" class="form-label fw-semibold small">Email Address</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" id="email" name="email" class="form-control"
-                       placeholder="you@example.com" required/>
+    <!-- Carousel -->
+    <div id="arenaCarousel" class="carousel slide mb-4" data-bs-ride="carousel" data-bs-interval="3000">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img th:src="@{/static/images/{f}(f='WhatsApp Image 2026-06-22 at 1.43.32 PM.jpeg')}"
+                     alt="J Arena Football Field"/>
+                <div class="carousel-caption-bar">
+                    <p><i class="bi bi-geo-alt-fill me-1"></i>World-class football facilities at J Arena</p>
+                </div>
             </div>
         </div>
-        <div class="mb-4">
-            <label for="password" class="form-label fw-semibold small">Password</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="password" name="password" class="form-control"
-                       placeholder="••••••••" required/>
-            </div>
-        </div>
-        <button type="submit" class="btn btn-green w-100 fw-semibold py-2">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        <button class="carousel-control-prev" type="button"
+                data-bs-target="#arenaCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Previous</span>
         </button>
-    </form>
+        <button class="carousel-control-next" type="button"
+                data-bs-target="#arenaCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
 
-    <p class="text-center text-muted small mt-3 mb-0">
-        Don't have an account? <a th:href="@{/register}" class="text-success fw-semibold">Register here</a>
-    </p>
+    <!-- Auth Card -->
+    <div class="auth-card mx-auto">
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4 justify-content-center border-0">
+            <li class="nav-item">
+                <a class="nav-link active" th:href="@{/login}">Sign In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/register}">Register</a>
+            </li>
+        </ul>
+
+        <!-- Error alert -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible py-2 small" role="alert">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Success alert -->
+        <div th:if="${param.registered}" class="alert alert-success py-2 small" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            Account created successfully! Please sign in.
+        </div>
+
+        <!-- Password reset success alert -->
+        <div th:if="${param.resetSuccess}" class="alert alert-success py-2 small" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            Password reset successfully! Please sign in with your new password.
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="you@example.com" required/>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-semibold small">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="••••••••" required/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-green w-100 fw-semibold py-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+
+            <div class="text-center mt-2">
+                <a th:href="@{/forgot-password}" class="text-success small fw-semibold text-decoration-none">
+                    <i class="bi bi-question-circle me-1"></i>Forgot Password?
+                </a>
+            </div>
+        </form>
+
+        <p class="text-center text-muted small mt-3 mb-0">
+            Don't have an account?
+            <a th:href="@{/register}" class="text-success fw-semibold">Register here</a>
+        </p>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
